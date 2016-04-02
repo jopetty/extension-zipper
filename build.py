@@ -37,24 +37,36 @@ def getMoveList(files, dirPath=''):
 	return toMove
 
 # Releases folder
-releasesDir = os.getcwd() + "/releases/"
+releasesDir = os.getcwd() + "/releases"
+if not os.path.isdir(releasesDir):
+	os.makedirs(releasesDir)
+releasesDir += '/'
 
 # .gitignore
 gitIgnoreFile = ".gitignore"
-gitIgnorePred = [line.rstrip('\n') for line in open(gitIgnoreFile)]
-gitIgnorePred.append('.git*')
-gitIgnorePred.append('*.md')
+gitIgnorePred = []
+if os.path.isfile(gitIgnoreFile):
+	gitIgnorePred = [line.rstrip('\n') for line in open(gitIgnoreFile)]
+	gitIgnorePred.append('.git*')
+	gitIgnorePred.append('*.md')
+else:
+	print('No .gitignore file was found.')
 
 # Iterate through all files/folder and get file paths
 initFileList = os.listdir(os.getcwd())
 moveList = getMoveList(matches(initFileList, gitIgnorePred))
 
 # Get the current version number
-with open('manifest.json') as manifest_file:
-	app_json_data = json.load(manifest_file)
-app_build_version = app_json_data['version']
-app_name = app_json_data['name']
-versionDirName = app_name + '_' + app_build_version
+if os.path.isfile('manifest.json'):
+	with open('manifest.json') as manifest_file:
+		app_json_data = json.load(manifest_file)
+	app_build_version = app_json_data['version']
+	app_name = app_json_data['name']
+	versionDirName = app_name + '_' + app_build_version
+else:
+	versionDirName = 'App_1.0'
+	print('No manifest.json file was found.')
+
 tmpDir = releasesDir + versionDirName
 
 # Try to create /releases/tmpDir
